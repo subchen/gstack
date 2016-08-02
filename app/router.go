@@ -72,6 +72,31 @@ func (r *Router) HandleFunc(methods string, path string, handlerFunc func(w http
 	r.Handle(methods, path, http.HandlerFunc(handlerFunc))
 }
 
+// GET registers the handlerFunc as route
+func (r *Router) GET(path string, handlerFunc func(w http.ResponseWriter, req *http.Request)) {
+	r.Handle("GET", path, http.HandlerFunc(handlerFunc))
+}
+
+// POST registers the handlerFunc as route
+func (r *Router) POST(path string, handlerFunc func(w http.ResponseWriter, req *http.Request)) {
+	r.Handle("POST", path, http.HandlerFunc(handlerFunc))
+}
+
+// PUT registers the handlerFunc as route
+func (r *Router) PUT(path string, handlerFunc func(w http.ResponseWriter, req *http.Request)) {
+	r.Handle("PUT", path, http.HandlerFunc(handlerFunc))
+}
+
+// PATCH registers the handlerFunc as route
+func (r *Router) PATCH(path string, handlerFunc func(w http.ResponseWriter, req *http.Request)) {
+	r.Handle("PATCH", path, http.HandlerFunc(handlerFunc))
+}
+
+// DELETE registers the handlerFunc as route
+func (r *Router) DELETE(path string, handlerFunc func(w http.ResponseWriter, req *http.Request)) {
+	r.Handle("DELETE", path, http.HandlerFunc(handlerFunc))
+}
+
 // Subrouters registers sub-routers
 func (r *Router) Subrouters(routers ...*Router) {
 	for _, router := range routers {
