@@ -105,8 +105,13 @@ func trimGOPATH(file, name string) (string, string) {
 	// the function name. For example, given:
 	//
 	//    GOPATH     /home/user
-	//    file       /home/user/src/pkg/sub/file.go
+	//    file       /home/user/src/pkg/module/file.go
 	//    fn.Name()  pkg/module.Type.Method
+	//
+	//    Example for fn.Name():
+	//               github.com/subchen/gstack/app.requestNotFound
+	//               github.com/subchen/gstack/app.(*Router).route
+	//               github.com/subchen/gstack/app.(*Router).(github.com/subchen/gstack/app.route)-fm
 	//
 	// We want to produce:
 	//
@@ -118,21 +123,20 @@ func trimGOPATH(file, name string) (string, string) {
 	// path until it finds two more than in the function name and then move
 	// one character forward to preserve the initial path segment without a
 	// leading separator.
-	const sep = "/"
-	goal := strings.Count(name, sep) + 2
-	i := len(file)
-	for n := 0; n < goal; n++ {
-		i = strings.LastIndex(file[:i], sep)
-		if i == -1 {
-			// not enough separators found, set i so that the slice expression
-			// below leaves file unmodified
-			i = -len(sep)
-			break
-		}
+
+	path := name
+	if pos := strings.Index(path, ".("); pos != -1 {
+		path = path[0 : pos-1]
 	}
-	// get back to 0 or trim the leading separator
-	file = file[i+len(sep):]
-	if pos := strings.LastIndex(name, "/"); pos != -1 {
+	count := strings.Count(path, "/") + 2
+
+	pairs := strings.Split(file, "/")
+	size := len(pairs)
+	if i := size - count; i > 0 {
+		file = strings.Join(pairs[i:size], "/")
+	}
+
+	if pos := strings.LastIndex(path, "/"); pos != -1 {
 		name = name[pos+1 : len(name)]
 	}
 	return file, name
