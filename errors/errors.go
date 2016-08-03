@@ -2,6 +2,7 @@ package errors
 
 import (
 	"fmt"
+	"github.com/subchen/gstack/runtime/stack"
 	"io"
 )
 
@@ -9,7 +10,7 @@ import (
 // that implements its own fmt.Formatter.
 type _error struct {
 	msg   string
-	stack Stack
+	stack stack.Stack
 	cause error
 }
 
@@ -45,20 +46,20 @@ func (e *_error) Format(s fmt.State, verb rune) {
 
 // New returns an error with the supplied message.
 func New(message string) error {
-	return &_error{message, Callers(3), nil}
+	return &_error{message, stack.Callers(3), nil}
 }
 
 // Newf returns an error with te supplied message.
 func Newf(format string, args ...interface{}) error {
-	return &_error{fmt.Sprintf(format, args...), Callers(3), nil}
+	return &_error{fmt.Sprintf(format, args...), stack.Callers(3), nil}
 }
 
 func Wrap(cause error, message string) error {
-	return &_error{message, Callers(3), cause}
+	return &_error{message, stack.Callers(3), cause}
 }
 
 func Wrapf(cause error, format string, args ...interface{}) error {
-	return &_error{fmt.Sprintf(format, args), Callers(3), cause}
+	return &_error{fmt.Sprintf(format, args), stack.Callers(3), cause}
 }
 
 // Cause returns the underlying cause of the error, if possible.

@@ -1,10 +1,10 @@
 package app
 
 import (
-	"errors"
 	"fmt"
-	"github.com/subchen/gstack/log"
 	"net/http"
+
+    "github.com/subchen/gstack/errors"
 )
 
 func requestNotFound(req *http.Request) error {
@@ -14,11 +14,9 @@ func requestNotFound(req *http.Request) error {
 type ErrorHandlerFunc func(w http.ResponseWriter, req *http.Request, code int, err interface{})
 
 func defaultErrorHandlerFunc(w http.ResponseWriter, req *http.Request, code int, err interface{}) {
-	log.Fatal("test")
-
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	w.Header().Set("X-Content-Type-Options", "nosniff")
 
 	w.WriteHeader(code)
-	fmt.Fprintf(w, "%v\n", err)
+	fmt.Fprintf(w, "%+v\n", err)
 }

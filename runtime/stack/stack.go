@@ -1,4 +1,4 @@
-package errors
+package stack
 
 import (
 	"fmt"
@@ -58,7 +58,7 @@ func (f Frame) Format(s fmt.State, verb rune) {
 }
 
 // Stack represents a stack of program counters.
-type Stack []Frame
+type Stack []uintptr
 
 // Format formats the stack according to the fmt.Formatter interface.
 //    %v    at github.com/subchen/gstack/errors/stack.go:83
@@ -67,31 +67,44 @@ type Stack []Frame
 //    %+v   at errors.Callers() (github.com/subchen/gstack/errors/stack.go:83)
 //          at main.test() (example/main.go:9)
 //          at main.main() (example/main.go:16)
-func (st Stack) Format(s fmt.State, verb rune) {
+func (stack Stack) Format(s fmt.State, verb rune) {
 	switch verb {
 	case 'v':
 		if s.Flag('+') {
-			for _, f := range st {
-				fmt.Fprintf(s, "\tat %+v\n", f)
+			for _, pc := range stack {
+				fmt.Fprintf(s, "\tat %+v\n", Frame(pc))
 			}
 		} else {
-			for _, f := range st {
-				fmt.Fprintf(s, "\tat %v\n", f)
+			for _, pc := range stack {
+				fmt.Fprintf(s, "\tat %v\n", Frame(pc))
 			}
 		}
 	}
 }
 
-// Callers returns a stack for caller
+// Frames returns stack frames
+func (stack Stack) Frames() []Frame {
+	frames := make([]Frame, len(stack))
+	for i, pc := range stack {
+		frames[i] = Frame(pc)
+	}
+	return frames
+}
+
+// Caller returns a frame for caller
+func Caller(skip int) (Frame, bool) {
+	if pc, _, _, ok := runtime.Caller(skip); ok {
+		return Frame(pc), true
+	} else {
+		return Frame(0), false
+	}
+}
+
+// Callers returns a stack for callers
 func Callers(skip int) Stack {
 	pcs := make([]uintptr, 32) // max depth is 32
 	n := runtime.Callers(skip, pcs)
-
-	stack := make([]Frame, n)
-	for i := 0; i < n; i++ {
-		stack[i] = Frame(pcs[i])
-	}
-	return stack
+	return Stack(pcs[0:n])
 }
 
 func trimGOPATH(file, name string) (string, string) {
