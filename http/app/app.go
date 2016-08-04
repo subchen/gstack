@@ -141,8 +141,9 @@ func (app *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		// it will be built on first request
 		handler := func(ctx *Context) {
 			path := ctx.Path()
-			routes := app.router.find(path)
 
+			// 1. get routes by path
+			routes := app.router.find(path)
 			if routes == nil {
 				// try to fix url and redirect
 				if app.RedirectTrailingSlash {
@@ -154,7 +155,9 @@ func (app *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					}
 					routes = app.router.find(path)
 					if routes != nil {
-						ctx.Redirect(path) // trim slash redirect
+						// redirect with query string (trim slash redirect)
+						ctx.Request.URL.Path = path
+						ctx.Redirect(ctx.Request.URL.String())
 						return
 					}
 				}
@@ -163,6 +166,7 @@ func (app *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
+			// 2. get route handler
 			route := routes.find(ctx.Method())
 			if route == nil {
 				ctx.ResponseWriter.Header().Set("Allow", routes.allows())
@@ -174,7 +178,7 @@ func (app *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			// execute middleware and handler
+			// 3. execute middleware and handler
 			route.handler(ctx)
 		}
 
