@@ -188,10 +188,10 @@ func (app *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	app.handler(ctx)
 }
 
-func (app *App) Run(addr string) {
-	http.ListenAndServe(addr, app)
+func (app *App) Run(addr string) error {
+	return http.ListenAndServe(addr, app)
 }
 
-func (app *App) RunTLS(addr, certFile, keyFile string) {
-	http.ListenAndServeTLS(addr, certFile, keyFile, app)
+func (app *App) RunTLS(addr, certFile, keyFile string) error {
+	return http.ListenAndServeTLS(addr, certFile, keyFile, app)
 }
