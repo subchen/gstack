@@ -1,7 +1,6 @@
 package app
 
 import (
-	"fmt"
 	"github.com/subchen/gstack/errors"
 	"net/http"
 	"strings"
@@ -116,10 +115,13 @@ func (app *App) route(method string, path string, handler HandlerFunc) {
 	app.router.add(method, app.prefix + path, handler)
 }
 
-func (app *App) Routes() {
-	for _, route := range app.router.routes {
-		fmt.Printf("%s %s\n", route.method, route.path)
+// Routes returns all register route path
+func (app *App) Routes() []string {
+	var paths  []string
+	for _, routes := range app.router.routesList {
+		paths = append(paths, routes.path)
 	}
+	return paths
 }
 
 // ServeHTTP implements http.Handler

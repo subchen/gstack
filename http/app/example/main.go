@@ -47,9 +47,10 @@ func main() {
 	a.GET("/health", middleware.HealthCheckHandler)
 	a.POST("/health", middleware.HealthCheckHandler)
 
-	a.GET("/ping/", middleware.HealthCheckHandler)
+	a.GET("/ping", middleware.HealthCheckHandler)
+	a.GET("/ping/{id}/", middleware.HealthCheckHandler)
 
-	a.Routes()
+	fmt.Println(a.Routes())
 
 	fmt.Println("Listening http://127.0.0.1:8080/v2/")
 	a.Run(":8080")

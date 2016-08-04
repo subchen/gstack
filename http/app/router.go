@@ -4,21 +4,25 @@ import "strings"
 
 type (
 	router struct {
-		root   *node
-		routes []*route // a route list, unused currently
+		root       *node
+		routesList []*routes // all path routes
 	}
 
 	node struct {
-		name         string // "{}", "*", "", ...
-		children     map[string]*node
-		methodRoutes methodRoutes
+		name     string // may be "{}", "*", "", ...
+		children map[string]*node
+		routes   *routes
 	}
 
 	// routes is group of route, they have same path
-	methodRoutes []*route
+	routes struct {
+		path   string
+		routes []*route
+	}
 
+	// route is a defined handler
 	route struct {
-		path    string
+		path    string // origin path
 		method  string
 		handler HandlerFunc
 	}
@@ -27,7 +31,7 @@ type (
 func newRouter() *router {
 	return &router{
 		root: &node{
-			name:  "/",
+			name: "/",
 		},
 	}
 }
@@ -48,9 +52,9 @@ func (r *router) add(method string, path string, handler HandlerFunc) {
 		nn, ok := n.children[name]
 		if !ok {
 			nn = &node{
-				name:     name,
-				children: nil,
-				methodRoutes:   nil,
+				name:         name,
+				children:     nil,
+				routes:  nil,
 			}
 
 			if n.children == nil {
@@ -68,14 +72,21 @@ func (r *router) add(method string, path string, handler HandlerFunc) {
 		handler: handler,
 	}
 
-	n.methodRoutes = append(n.methodRoutes, route)
-	r.routes = append(r.routes, route)
+	if n.routes == nil {
+		n.routes = &routes{
+			path: path,
+			routes: nil,
+		}
+		r.routesList = append(r.routesList, n.routes)
+	}
+
+	n.routes.routes = append(n.routes.routes, route)
 }
 
-func (r *router) find(path string) methodRoutes {
+func (r *router) find(path string) *routes {
 	names := strings.Split(path, "/")
 	if n := r.root.find(names[1], names[2:]); n != nil {
-		return n.methodRoutes
+		return n.routes
 	}
 	return nil
 }
@@ -88,7 +99,7 @@ func (n *node) find(name string, path []string) *node {
 	// static
 	if child, ok := n.children[name]; ok {
 		if len(path) == 0 {
-			if child.methodRoutes != nil {
+			if child.routes != nil {
 				return child // match
 			}
 		} else {
@@ -102,7 +113,7 @@ func (n *node) find(name string, path []string) *node {
 	// param
 	if child, ok := n.children["{}"]; ok {
 		if len(path) == 0 {
-			if child.methodRoutes != nil {
+			if child.routes != nil {
 				return child // match
 			}
 		} else {
@@ -122,8 +133,8 @@ func (n *node) find(name string, path []string) *node {
 }
 
 // find returns the matched route
-func (r methodRoutes) find(method string) *route {
-	for _, route := range r {
+func (r *routes) find(method string) *route {
+	for _, route := range r.routes {
 		if route.method == method {
 			return route
 		}
@@ -132,9 +143,9 @@ func (r methodRoutes) find(method string) *route {
 }
 
 // methods returns all available methods (OPTIONS)
-func (r methodRoutes) allows() string {
+func (r *routes) allows() string {
 	var methods []string
-	for _, route := range r {
+	for _, route := range r.routes {
 		methods = append(methods, route.method)
 	}
 	return strings.Join(methods, ", ")
