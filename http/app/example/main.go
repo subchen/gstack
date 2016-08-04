@@ -22,7 +22,6 @@ func userGroupHandles(g *app.Group) {
 func main() {
 
 	a := app.New("/v2")
-	a.RedirectTrailingSlash = true
 
 	a.UsePre(middleware.Logger())
 
@@ -45,8 +44,10 @@ func main() {
 		app.Group("/users").Apply(userGroupHandles)
 	*/
 
-	a.GET("/health/", middleware.HealthCheckHandler)
-	a.POST("/health/", middleware.HealthCheckHandler)
+	a.GET("/health", middleware.HealthCheckHandler)
+	a.POST("/health", middleware.HealthCheckHandler)
+
+	a.GET("/ping/", middleware.HealthCheckHandler)
 
 	a.Routes()
 

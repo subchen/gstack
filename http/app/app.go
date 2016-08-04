@@ -47,7 +47,7 @@ func New(prefix string) *App {
 	app := &App{}
 	app.prefix = prefix
 	app.router = newRouter()
-	app.RedirectTrailingSlash = false
+	app.RedirectTrailingSlash = true
 	return app
 }
 
@@ -161,11 +161,10 @@ func (app *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			method := ctx.Method()
-			route := routes[method]
+			route := routes.find(ctx.Method())
 			if route == nil {
 				ctx.ResponseWriter.Header().Set("Allow", routes.allows())
-				if method == "OPTIONS" {
+				if ctx.Method() == "OPTIONS" {
 					ctx.ResponseWriter.WriteHeader(http.StatusNoContent)
 				} else {
 					ctx.ResponseWriter.WriteHeader(http.StatusMethodNotAllowed)

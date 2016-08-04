@@ -5,16 +5,17 @@ import "strings"
 type (
 	router struct {
 		root   *node
-		routes []route
+		routes []*route // a route list, unused currently
 	}
 
 	node struct {
-		name     string // "{}", "*", "", ...
-		children map[string]*node
-		routes   routes
+		name         string // "{}", "*", "", ...
+		children     map[string]*node
+		methodRoutes methodRoutes
 	}
 
-	routes map[string]*route
+	// routes is group of route, they have same path
+	methodRoutes []*route
 
 	route struct {
 		path    string
@@ -49,7 +50,7 @@ func (r *router) add(method string, path string, handler HandlerFunc) {
 			nn = &node{
 				name:     name,
 				children: nil,
-				routes:   nil,
+				methodRoutes:   nil,
 			}
 
 			if n.children == nil {
@@ -61,24 +62,20 @@ func (r *router) add(method string, path string, handler HandlerFunc) {
 		n = nn
 	}
 
-	if n.routes == nil {
-		n.routes = make(map[string]*route, 2)
-	}
-
 	route := &route{
 		path:    path,
 		method:  method,
 		handler: handler,
 	}
 
-	n.routes[method] = route
-	r.routes = append(r.routes, *route)
+	n.methodRoutes = append(n.methodRoutes, route)
+	r.routes = append(r.routes, route)
 }
 
-func (r *router) find(path string) routes {
+func (r *router) find(path string) methodRoutes {
 	names := strings.Split(path, "/")
 	if n := r.root.find(names[1], names[2:]); n != nil {
-		return n.routes
+		return n.methodRoutes
 	}
 	return nil
 }
@@ -91,7 +88,7 @@ func (n *node) find(name string, path []string) *node {
 	// static
 	if child, ok := n.children[name]; ok {
 		if len(path) == 0 {
-			if child.routes != nil {
+			if child.methodRoutes != nil {
 				return child // match
 			}
 		} else {
@@ -105,7 +102,7 @@ func (n *node) find(name string, path []string) *node {
 	// param
 	if child, ok := n.children["{}"]; ok {
 		if len(path) == 0 {
-			if child.routes != nil {
+			if child.methodRoutes != nil {
 				return child // match
 			}
 		} else {
@@ -124,11 +121,21 @@ func (n *node) find(name string, path []string) *node {
 	return nil
 }
 
+// find returns the matched route
+func (r methodRoutes) find(method string) *route {
+	for _, route := range r {
+		if route.method == method {
+			return route
+		}
+	}
+	return nil
+}
+
 // methods returns all available methods (OPTIONS)
-func (r routes) allows() string {
+func (r methodRoutes) allows() string {
 	var methods []string
-	for method, _ := range r {
-		methods = append(methods, method)
+	for _, route := range r {
+		methods = append(methods, route.method)
 	}
 	return strings.Join(methods, ", ")
 }
