@@ -2,6 +2,7 @@ package app
 
 import (
 	"github.com/subchen/gstack/errors"
+	"github.com/subchen/gstack/log"
 	"net/http"
 	"strings"
 )
@@ -140,23 +141,23 @@ func (app *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		// and cached in app.handler
 		// it will be built on first request
 		handler := func(ctx *Context) {
-			path := ctx.Path()
+			pathnames := strings.Split(ctx.Path(), "/")
 
 			// 1. get routes by path
-			routes := app.router.find(path)
+			routes := app.router.find(pathnames)
 			if routes == nil {
 				// try to fix url and redirect
 				if app.RedirectTrailingSlash {
-					last := len(path) - 1
-					if path[last] == '/' {
-						path = path[0:last]
+					last := len(pathnames) - 1
+					if pathnames[last] == "" {
+						pathnames = pathnames[0:last]
 					} else {
-						path = path + "/"
+						pathnames = append(pathnames, "")
 					}
-					routes = app.router.find(path)
+					routes = app.router.find(pathnames)
 					if routes != nil {
 						// redirect with query string (trim slash redirect)
-						ctx.Request.URL.Path = path
+						ctx.Request.URL.Path = strings.Join(pathnames, "/")
 						ctx.Redirect(ctx.Request.URL.String())
 						return
 					}
@@ -177,8 +178,12 @@ func (app *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				}
 				return
 			}
+			log.Debug("Found route: %v", route.path)
 
-			// 3. execute middleware and handler
+			// 3. extra vars param from path
+			ctx.vars = app.router.makeVars(route.path, pathnames)
+
+			// 4. execute middleware and handler
 			route.handler(ctx)
 		}
 

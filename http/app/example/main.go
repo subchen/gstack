@@ -28,7 +28,7 @@ func main() {
 	a.Use(middleware.CORS())
 
 	a.Use(WrapMiddleware(func(ctx *app.Context) {
-		log.Fatal("Middleware")
+		log.Info("Middleware")
 	}))
 	/*
 		app.GET("/health", handler)
@@ -48,7 +48,10 @@ func main() {
 	a.POST("/health", middleware.HealthCheckHandler)
 
 	a.GET("/ping", middleware.HealthCheckHandler)
-	a.GET("/ping/{id}/", middleware.HealthCheckHandler)
+	a.GET("/ping/{id}/{name}", func(ctx *app.Context) {
+		fmt.Fprintf(ctx.ResponseWriter, "id = %s\n", ctx.Vars("id"))
+		fmt.Fprintf(ctx.ResponseWriter, "name = %s\n", ctx.Vars("name"))
+	})
 
 	fmt.Println(a.Routes())
 

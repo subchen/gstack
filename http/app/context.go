@@ -33,6 +33,10 @@ func (ctx *Context) Header() http.Header {
 	return ctx.Request.Header
 }
 
+func (ctx *Context) Vars(name string) string {
+	return ctx.vars[name]
+}
+
 func (ctx *Context) Redirect(url string) {
 	code := http.StatusMovedPermanently // 301
 	if ctx.Request.Method != "GET" {
