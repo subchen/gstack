@@ -52,9 +52,9 @@ func (r *router) add(method string, path string, handler HandlerFunc) {
 		nn, ok := n.children[name]
 		if !ok {
 			nn = &node{
-				name:         name,
-				children:     nil,
-				routes:  nil,
+				name:     name,
+				children: nil,
+				routes:   nil,
 			}
 
 			if n.children == nil {
@@ -74,7 +74,7 @@ func (r *router) add(method string, path string, handler HandlerFunc) {
 
 	if n.routes == nil {
 		n.routes = &routes{
-			path: path,
+			path:   path,
 			routes: nil,
 		}
 		r.routesList = append(r.routesList, n.routes)

@@ -12,11 +12,11 @@ type (
 	MiddlewareFunc func(next HandlerFunc) HandlerFunc
 
 	App struct {
-		prefix                string
-		middlewarePre         []MiddlewareFunc
-		middleware            []MiddlewareFunc
-		router                *router
-		handler               HandlerFunc
+		prefix        string
+		middlewarePre []MiddlewareFunc
+		middleware    []MiddlewareFunc
+		router        *router
+		handler       HandlerFunc
 
 		// Enables automatic redirection if the current route can't be matched but a
 		// handler for the path with (without) the trailing slash exists.
@@ -59,39 +59,39 @@ func (app *App) Use(middleware ...MiddlewareFunc) {
 }
 
 func (app *App) GET(path string, handler HandlerFunc) {
-	app.route("GET", path, handler)
+	app.add("GET", path, handler)
 }
 
 func (app *App) POST(path string, handler HandlerFunc) {
-	app.route("POST", path, handler)
+	app.add("POST", path, handler)
 }
 
 func (app *App) PUT(path string, handler HandlerFunc) {
-	app.route("PUT", path, handler)
+	app.add("PUT", path, handler)
 }
 
 func (app *App) PATCH(path string, handler HandlerFunc) {
-	app.route("PATCH", path, handler)
+	app.add("PATCH", path, handler)
 }
 
 func (app *App) DELETE(path string, handler HandlerFunc) {
-	app.route("DELETE", path, handler)
+	app.add("DELETE", path, handler)
 }
 
 func (app *App) OPTIONS(path string, handler HandlerFunc) {
-	app.route("OPTIONS", path, handler)
+	app.add("OPTIONS", path, handler)
 }
 
 func (app *App) HEAD(path string, handler HandlerFunc) {
-	app.route("HEAD", path, handler)
+	app.add("HEAD", path, handler)
 }
 
 func (app *App) CONNECT(path string, handler HandlerFunc) {
-	app.route("CONNECT", path, handler)
+	app.add("CONNECT", path, handler)
 }
 
 func (app *App) TRACE(path string, handler HandlerFunc) {
-	app.route("TRACE", path, handler)
+	app.add("TRACE", path, handler)
 }
 
 func (app *App) Handle(methods string, path string, handler HandlerFunc) {
@@ -99,25 +99,25 @@ func (app *App) Handle(methods string, path string, handler HandlerFunc) {
 		methods = ALL_METHODS
 	}
 	for _, method := range strings.Split(methods, ",") {
-		app.route(strings.TrimSpace(method), path, handler)
+		app.add(strings.TrimSpace(method), path, handler)
 	}
 }
 
 func (app *App) Group(path string) *Group {
-	return newGroup(app.prefix + path, app.middleware, app.router)
+	return newGroup(app.prefix+path, app.middleware, app.router)
 }
 
-func (app *App) route(method string, path string, handler HandlerFunc) {
+func (app *App) add(method string, path string, handler HandlerFunc) {
 	// make handler chain
 	for i := len(app.middleware) - 1; i >= 0; i-- {
 		handler = app.middleware[i](handler)
 	}
-	app.router.add(method, app.prefix + path, handler)
+	app.router.add(method, app.prefix+path, handler)
 }
 
 // Routes returns all register route path
 func (app *App) Routes() []string {
-	var paths  []string
+	var paths []string
 	for _, routes := range app.router.routesList {
 		paths = append(paths, routes.path)
 	}

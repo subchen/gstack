@@ -29,39 +29,39 @@ func (g *Group) Use(middleware ...MiddlewareFunc) {
 }
 
 func (g *Group) GET(path string, handler HandlerFunc) {
-	g.route("GET", path, handler)
+	g.add("GET", path, handler)
 }
 
 func (g *Group) POST(path string, handler HandlerFunc) {
-	g.route("POST", path, handler)
+	g.add("POST", path, handler)
 }
 
 func (g *Group) PUT(path string, handler HandlerFunc) {
-	g.route("PUT", path, handler)
+	g.add("PUT", path, handler)
 }
 
 func (g *Group) PATCH(path string, handler HandlerFunc) {
-	g.route("PATCH", path, handler)
+	g.add("PATCH", path, handler)
 }
 
 func (g *Group) DELETE(path string, handler HandlerFunc) {
-	g.route("DELETE", path, handler)
+	g.add("DELETE", path, handler)
 }
 
 func (g *Group) OPTIONS(path string, handler HandlerFunc) {
-	g.route("OPTIONS", path, handler)
+	g.add("OPTIONS", path, handler)
 }
 
 func (g *Group) HEAD(path string, handler HandlerFunc) {
-	g.route("HEAD", path, handler)
+	g.add("HEAD", path, handler)
 }
 
 func (g *Group) CONNECT(path string, handler HandlerFunc) {
-	g.route("CONNECT", path, handler)
+	g.add("CONNECT", path, handler)
 }
 
 func (g *Group) TRACE(path string, handler HandlerFunc) {
-	g.route("TRACE", path, handler)
+	g.add("TRACE", path, handler)
 }
 
 func (g *Group) Handle(methods string, path string, handler HandlerFunc) {
@@ -69,7 +69,7 @@ func (g *Group) Handle(methods string, path string, handler HandlerFunc) {
 		methods = ALL_METHODS
 	}
 	for _, method := range strings.Split(methods, ",") {
-		g.route(strings.TrimSpace(method), path, handler)
+		g.add(strings.TrimSpace(method), path, handler)
 	}
 }
 
@@ -77,7 +77,7 @@ func (g *Group) Group(path string) *Group {
 	return newGroup(g.prefix+path, g.middleware, g.router)
 }
 
-func (g *Group) route(method string, path string, handler HandlerFunc) {
+func (g *Group) add(method string, path string, handler HandlerFunc) {
 	// make handler chain
 	for i := len(g.middleware) - 1; i >= 0; i-- {
 		handler = g.middleware[i](handler)
