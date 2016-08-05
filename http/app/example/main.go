@@ -7,9 +7,12 @@ import (
 	"github.com/subchen/gstack/log"
 )
 
-/*
 func userGroupHandles(g *app.Group) {
-	g.Handle("GET", "/", handler)
+	handler := func(ctx *app.Context) {
+		fmt.Fprintf(ctx.ResponseWriter, "userid = %s\n", ctx.Vars("id"))
+	}
+
+	g.Handle("GET", "", handler)
 	g.Handle("GET", "/{id}", handler)
 	g.Handle("POST", "/{id}", handler)
 	g.Handle("PUT", "/{id}", handler)
@@ -17,7 +20,6 @@ func userGroupHandles(g *app.Group) {
 	g.Handle("DELETE", "/{id}", handler)
 	g.Handle("GET", "/{id}/profiles", handler)
 }
-*/
 
 func main() {
 
@@ -52,6 +54,8 @@ func main() {
 		fmt.Fprintf(ctx.ResponseWriter, "id = %s\n", ctx.Vars("id"))
 		fmt.Fprintf(ctx.ResponseWriter, "name = %s\n", ctx.Vars("name"))
 	})
+
+	a.Group("/users").Configure(userGroupHandles)
 
 	fmt.Println(a.Routes())
 
