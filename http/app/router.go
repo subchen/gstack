@@ -184,5 +184,10 @@ func (r *routes) allows() string {
 	for _, route := range r.routes {
 		methods = append(methods, route.method)
 	}
-	return strings.Join(methods, ", ")
+	allows := strings.Join(methods, ", ")
+
+	if !strings.Contains(allows, "OPTIONS") {
+		allows = allows + ", OPTIONS"
+	}
+	return allows
 }
