@@ -1,6 +1,10 @@
 package app
 
-import "strings"
+import (
+	"fmt"
+	"regexp"
+	"strings"
+)
 
 type (
 	router struct {
@@ -29,6 +33,11 @@ type (
 	}
 )
 
+var (
+	RE_PATH_PATTERN_1 = regexp.MustCompile(`^(/([a-zA-Z0-9_\-.]+|\{[A-zA-Z0-9_\-]+\*?\}))*/?$`)
+	RE_PATH_PATTERN_2 = regexp.MustCompile(`^[^*]+(\*\})?$`)
+)
+
 func newRouter() *router {
 	return &router{
 		root: &node{
@@ -41,6 +50,13 @@ func newRouter() *router {
 
 // add registers a handler into router tree
 func (r *router) add(method string, path string, handler HandlerFunc) {
+	if !RE_PATH_PATTERN_1.MatchString(path) {
+		panic("Invalid path pattern: " + path)
+	}
+	if !RE_PATH_PATTERN_2.MatchString(path) {
+		panic("Invalid path pattern, any match must be put on last position: " + path)
+	}
+
 	names := strings.Split(path, "/")
 
 	// 1. find node
