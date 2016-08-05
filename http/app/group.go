@@ -66,7 +66,7 @@ func (g *Group) TRACE(path string, handler HandlerFunc) {
 
 func (g *Group) Handle(methods string, path string, handler HandlerFunc) {
 	if methods == "*" {
-		methods = ALL_METHODS
+		methods = DEFAULT_ALL_METHODS
 	}
 	for _, method := range strings.Split(methods, ",") {
 		g.add(strings.TrimSpace(method), path, handler)

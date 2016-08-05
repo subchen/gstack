@@ -2,8 +2,8 @@ package middleware
 
 import (
 	"fmt"
-	"strings"
 	"github.com/subchen/gstack/http/app"
+	"strings"
 )
 
 func HealthCheckHandler(ctx *app.Context) {

@@ -1,10 +1,11 @@
 package app
 
 import (
-	"github.com/subchen/gstack/errors"
-	"github.com/subchen/gstack/log"
 	"net/http"
 	"strings"
+
+	"github.com/subchen/gstack/errors"
+	"github.com/subchen/gstack/log"
 )
 
 type (
@@ -29,7 +30,7 @@ type (
 )
 
 const (
-	ALL_METHODS = "GET,POST,PUT,PATCH,DELETE,OPTIONS,HEAD,CONNECT,TRACE"
+	DEFAULT_ALL_METHODS = "GET,POST,PUT,PATCH,DELETE"
 )
 
 func New(prefix string) *App {
@@ -97,7 +98,7 @@ func (app *App) TRACE(path string, handler HandlerFunc) {
 
 func (app *App) Handle(methods string, path string, handler HandlerFunc) {
 	if methods == "*" {
-		methods = ALL_METHODS
+		methods = DEFAULT_ALL_METHODS
 	}
 	for _, method := range strings.Split(methods, ",") {
 		app.add(strings.TrimSpace(method), path, handler)

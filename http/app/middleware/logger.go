@@ -1,8 +1,8 @@
 package middleware
 
 import (
-	"github.com/subchen/gstack/http/app"
 	"fmt"
+	"github.com/subchen/gstack/http/app"
 	"time"
 )
 
