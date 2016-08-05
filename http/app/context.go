@@ -14,9 +14,9 @@ type Context struct {
 
 func newContext(w http.ResponseWriter, r *http.Request, app *App) *Context {
 	return &Context{
-		Request:        r,
 		ResponseWriter: w,
-		vars:           make(map[string]string, 4),
+		Request:        r,
+		vars:           nil,
 		app:            app,
 	}
 }
