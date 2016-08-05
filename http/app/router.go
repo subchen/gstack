@@ -1,7 +1,6 @@
 package app
 
 import (
-	"fmt"
 	"regexp"
 	"strings"
 )
@@ -103,15 +102,12 @@ func (r *router) add(method string, path string, handler HandlerFunc) {
 
 	n.routes.routes = append(n.routes.routes, route)
 
-	// 3. make param maaping for path
+	// 3. make param mapping for path
 	if _, ok := r.mappingParamIndex[path]; !ok {
 		mapping := make(map[string]int, 4)
 		for i, name := range names {
-			if strings.HasPrefix(name, "{") {
+			if len(name) > 0 && name[0] == '{' {
 				name = name[1 : len(name)-1]
-				if strings.HasSuffix(name, "*") {
-					name = name[0 : len(name)-1]
-				}
 				mapping[name] = i
 			}
 		}
@@ -131,7 +127,12 @@ func (r *router) makeVars(path string, pathnames []string) map[string]string {
 	if mapping, ok := r.mappingParamIndex[path]; ok {
 		vars := make(map[string]string, len(mapping))
 		for name, index := range mapping {
-			vars[name] = pathnames[index]
+			if name[len(name)-1] == '*' {
+				name = name[0 : len(name)-1]
+				vars[name] = strings.Join(pathnames[index:], "/")
+			} else {
+				vars[name] = pathnames[index]
+			}
 		}
 		return vars
 	}
