@@ -137,67 +137,69 @@ func (app *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}()
 
+	// it make middleware and handler as a single chain handler
+	// and cached in app.handler
+	// it will be built on first request
 	if app.handler == nil {
-		// it make middleware and handler as a single chain handler
-		// and cached in app.handler
-		// it will be built on first request
-		handler := func(ctx *Context) {
-			pathnames := strings.Split(ctx.Path(), "/")
-
-			// 1. get routes by path
-			routes := app.router.find(pathnames)
-			if routes == nil {
-				// try to fix url and redirect
-				if app.RedirectTrailingSlash && ctx.Path() != "/" {
-					last := len(pathnames) - 1
-					if pathnames[last] == "" {
-						pathnames = pathnames[0:last]
-					} else {
-						pathnames = append(pathnames, "")
-					}
-					routes = app.router.find(pathnames)
-					if routes != nil {
-						// redirect with query string (trim slash redirect)
-						ctx.Request.URL.Path = strings.Join(pathnames, "/")
-						ctx.Redirect(ctx.Request.URL.String())
-						return
-					}
-				}
-
-				ctx.Error(http.StatusNotFound, errors.Newf("Request not found: %s", ctx.Path()))
-				return
-			}
-
-			// 2. get route handler
-			route := routes.find(ctx.Method())
-			if route == nil {
-				ctx.ResponseWriter.Header().Set("Allow", routes.allows())
-				if ctx.Method() == "OPTIONS" {
-					ctx.ResponseWriter.WriteHeader(http.StatusNoContent)
-				} else {
-					ctx.ResponseWriter.WriteHeader(http.StatusMethodNotAllowed)
-				}
-				return
-			}
-			log.Debug("Found route: %v", route.path)
-
-			// 3. extra vars param from path
-			ctx.vars = app.router.makeVars(route.path, pathnames)
-
-			// 4. execute middleware and handler
-			route.handler(ctx)
-		}
-
-		// chain pre middleware
+		// make chain for pre middleware
+		handler := app.serveHttpRequestHandler()
 		for i := len(app.middlewarePre) - 1; i >= 0; i-- {
 			handler = app.middlewarePre[i](handler)
 		}
-
 		app.handler = handler
 	}
 
 	// execute middleware and handler
 	app.handler(ctx)
+}
+
+func (app *App) serveHttpRequestHandler() HandlerFunc {
+	return func(ctx *Context) {
+		pathnames := strings.Split(ctx.Path(), "/")
+
+		// 1. get routes by path
+		routes := app.router.find(pathnames)
+		if routes == nil {
+			// try to fix url and redirect
+			if app.RedirectTrailingSlash && ctx.Path() != "/" {
+				last := len(pathnames) - 1
+				if pathnames[last] == "" {
+					pathnames = pathnames[0:last]
+				} else {
+					pathnames = append(pathnames, "")
+				}
+				routes = app.router.find(pathnames)
+				if routes != nil {
+					// redirect with query string (trim slash redirect)
+					ctx.Request.URL.Path = strings.Join(pathnames, "/")
+					ctx.Redirect(ctx.Request.URL.String())
+					return
+				}
+			}
+
+			ctx.Error(http.StatusNotFound, errors.Newf("Request not found: %s", ctx.Path()))
+			return
+		}
+
+		// 2. get route handler
+		route := routes.find(ctx.Method())
+		if route == nil {
+			ctx.ResponseWriter.Header().Set("Allow", routes.allows())
+			if ctx.Method() == "OPTIONS" {
+				ctx.ResponseWriter.WriteHeader(http.StatusNoContent)
+			} else {
+				ctx.ResponseWriter.WriteHeader(http.StatusMethodNotAllowed)
+			}
+			return
+		}
+		log.Debug("Found route: %v", route.path)
+
+		// 3. extra vars param from path
+		ctx.vars = app.router.makeVars(route.path, pathnames)
+
+		// 4. execute middleware and handler
+		route.handler(ctx)
+	}
 }
 
 func (app *App) Run(addr string) error {
