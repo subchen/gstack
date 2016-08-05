@@ -148,7 +148,7 @@ func (app *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			routes := app.router.find(pathnames)
 			if routes == nil {
 				// try to fix url and redirect
-				if app.RedirectTrailingSlash {
+				if app.RedirectTrailingSlash && ctx.Path() != "/" {
 					last := len(pathnames) - 1
 					if pathnames[last] == "" {
 						pathnames = pathnames[0:last]
