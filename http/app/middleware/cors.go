@@ -18,16 +18,13 @@ const (
 func CORS() app.MiddlewareFunc {
 	return func(next app.HandlerFunc) app.HandlerFunc {
 		return func(ctx *app.Context) {
-			header := ctx.ResponseWriter.Header()
+			ctx.SetHeader(HeaderAccessControlAllowOrigin, "*")
+			ctx.SetHeader(HeaderAccessControlAllowMethods, app.DEFAULT_ALL_METHODS)
+			ctx.SetHeader(HeaderAccessControlAllowCredentials, "true")
 
-			header.Set(HeaderAccessControlAllowOrigin, "*")
-			header.Set(HeaderAccessControlAllowMethods, app.DEFAULT_ALL_METHODS)
-			header.Set(HeaderAccessControlAllowCredentials, "true")
+			ctx.SetHeader(HeaderAccessControlAllowHeaders, ctx.GetHeader(HeaderAccessControlRequestHeaders))
 
-			h := ctx.Header().Get(HeaderAccessControlRequestHeaders)
-			header.Set(HeaderAccessControlAllowHeaders, h)
-
-			//header.Set(HeaderAccessControlMaxAge, "0")
+			//ctx.SetHeader(HeaderAccessControlMaxAge, "0")
 
 			next(ctx)
 		}
