@@ -42,7 +42,7 @@ func New(out io.Writer) *Logger {
 		out:        out,
 		level:      DEBUG,
 		name:       "",
-		timeLayout: "2006-01-02 15:04:05.999",
+		timeLayout: "2006-01-02 15:04:05.000",
 		longFile:   false,
 		colorful:   false,
 		callerSkip: 2,
