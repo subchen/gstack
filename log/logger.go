@@ -41,6 +41,7 @@ func New(out io.Writer) *Logger {
 	return &Logger{
 		out:        out,
 		level:      DEBUG,
+		pid:        os.GetPid(),
 		name:       "",
 		timeLayout: "2006-01-02 15:04:05.000",
 		longFile:   false,
@@ -53,6 +54,7 @@ type Logger struct {
 	mu         sync.Mutex
 	out        io.Writer
 	level      int
+	pid        int
 	name       string
 	timeLayout string
 	longFile   bool
@@ -157,6 +159,8 @@ func (l *Logger) log(level int, msg string, args ...interface{}) {
 	}
 
 	buf := new(bytes.Buffer)
+	buf.WriteByte(' ')
+	buf.WriteInt(strconv.Itoa(l.pid))
 	buf.WriteByte(' ')
 	if l.name != "" {
 		buf.WriteString(l.name)
