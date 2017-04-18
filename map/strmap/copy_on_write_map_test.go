@@ -1,9 +1,11 @@
-package cow
+package strmap
 
 import "testing"
 
-func TestMap(t *testing.T) {
-	m := New(map[Key]Value{
+func TestCopyOnWriteMap(t *testing.T) {
+	m := NewCopyOnWriteMap()
+
+	m.Copy(map[Key]interface{}{
 		"a": "1",
 		"b": "2",
 		"c": "3",
