@@ -2,8 +2,8 @@ package strmap
 
 import "testing"
 
-func TestCopyOnWriteMap(t *testing.T) {
-	m := NewCopyOnWriteMap()
+func TestConcurrentMap(t *testing.T) {
+	m := NewConcurrentMap()
 
 	m.Copy(map[string]interface{}{
 		"a": "1",

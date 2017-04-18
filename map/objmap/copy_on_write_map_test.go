@@ -5,7 +5,7 @@ import "testing"
 func TestCopyOnWriteMap(t *testing.T) {
 	m := NewCopyOnWriteMap()
 
-	m.Copy(map[string]interface{}{
+	m.Copy(map[Key]Value{
 		"a": "1",
 		"b": "2",
 		"c": "3",
