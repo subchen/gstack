@@ -13,7 +13,7 @@ type (
 	}
 )
 
-// NewCopyOnWriteMap initializes a new map based on an original map.
+// NewCopyOnWriteMap initializes a new empty map.
 // Use of nil to empty the CopyOnWriteMap is okay.
 func NewCopyOnWriteMap() *CopyOnWriteMap {
 	m := new(CopyOnWriteMap)
