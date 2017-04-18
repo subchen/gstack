@@ -65,8 +65,8 @@ func (m *ConcurrentMap) Clear() {
 }
 
 func (m *ConcurrentMap) Keys() []string {
-	var keys []string
 	m.mutex.RLock()
+	keys := make([]string, len(m.data))
 	for k, _ := range m.data {
 		keys = append(keys, k)
 	}
@@ -75,8 +75,8 @@ func (m *ConcurrentMap) Keys() []string {
 }
 
 func (m *ConcurrentMap) Values() []interface{} {
-	var values []interface{}
 	m.mutex.RLock()
+	values := make([]interface{}, len(m.data))
 	for _, v := range m.data {
 		values = append(values, v)
 	}
