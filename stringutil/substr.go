@@ -47,3 +47,19 @@ func SubstrAfterLast(str string, find string) string {
 	}
 	return str[pos+len(find):]
 }
+
+func SubstrBetween(str string, begin string, end string) string {
+	ipos := strings.Index(str, begin)
+	if ipos < 0 {
+		return ""
+	}
+
+	leftStr := str[ipos+len(begin) : len(str)]
+
+	jpos := strings.Index(leftStr, end)
+	if jpos < 0 {
+		return ""
+	}
+
+	return leftStr[0:jpos]
+}

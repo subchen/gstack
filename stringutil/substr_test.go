@@ -2,7 +2,7 @@ package stringutil
 
 import "testing"
 
-func TestSubstrBeforeHandler(t *testing.T) {
+func TestSubstrBefore(t *testing.T) {
 	var tests = []struct {
 		str  string
 		find string
@@ -23,7 +23,7 @@ func TestSubstrBeforeHandler(t *testing.T) {
 	}
 }
 
-func TestSubstrAfterHandler(t *testing.T) {
+func TestSubstrAfter(t *testing.T) {
 	var tests = []struct {
 		str  string
 		find string
@@ -44,7 +44,7 @@ func TestSubstrAfterHandler(t *testing.T) {
 	}
 }
 
-func TestSubstrBeforeLastHandler(t *testing.T) {
+func TestSubstrBeforeLast(t *testing.T) {
 	var tests = []struct {
 		str  string
 		find string
@@ -65,7 +65,7 @@ func TestSubstrBeforeLastHandler(t *testing.T) {
 	}
 }
 
-func TestSubstrAfterLastHandler(t *testing.T) {
+func TestSubstrAfterLast(t *testing.T) {
 	var tests = []struct {
 		str  string
 		find string
@@ -83,6 +83,30 @@ func TestSubstrAfterLastHandler(t *testing.T) {
 	for _, test := range tests {
 		if got := SubstrAfterLast(test.str, test.find); got != test.want {
 			t.Errorf("SubstrAfterLast(%q, %q) = %q; want: %q", test.str, test.find, got, test.want)
+		}
+	}
+}
+
+func TestSubstrBetweenLast(t *testing.T) {
+	var tests = []struct {
+		str   string
+		start string
+		end   string
+		want  string
+	}{
+		{"", "*", "*", ""},
+		{"*", "", "", ""},
+		{"abc", "a", "c", "b"},
+		{"abcba", "a", "a", "bcb"},
+		{"abcba", "a", "b", ""},
+		{"abc", "c", "a", ""},
+		{"abc", "a", "d", ""},
+		{"abc", "z", "a", ""},
+	}
+
+	for _, test := range tests {
+		if got := SubstrBetween(test.str, test.start, test.end); got != test.want {
+			t.Errorf("SubstrAfterLast(%q, %q, %q) = %q; want: %q", test.str, test.start, test.end, got, test.want)
 		}
 	}
 }
