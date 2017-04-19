@@ -6,7 +6,7 @@ import (
 )
 
 // std is a default logger for console
-var std = New(os.Stdout).SetColorful(true).SkipCaller(3)
+var std = New(os.Stdout).EnableColorizedLevel(true).SkipCaller(3)
 
 // Get log level
 func GetLevel() int {
@@ -28,14 +28,19 @@ func SetTimeLayout(layout string) {
 	std.SetTimeLayout(layout)
 }
 
-// Use long file name instead of short file name
-func UseLongFile() {
-	std.UseLongFile()
+// EnableGoroutineId output goroutinue id
+func EnableGoroutineId(enable bool) {
+	std.EnableGoroutineId(enable)
 }
 
-// SetColorful set color output to console
-func SetColorful(colorful bool) {
-	std.SetColorful(colorful)
+// EnableLongFileFormat output long file name
+func EnableLongFileFormat(enable bool) {
+	std.EnableLongFileFormat(enable)
+}
+
+// EnableColorizedLevel output colorized level
+func EnableColorizedLevel(enable bool) {
+	std.EnableColorizedLevel(enable)
 }
 
 // Set a writer

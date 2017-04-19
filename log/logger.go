@@ -10,6 +10,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/subchen/gstack/gls"
 )
 
 // Log Level
@@ -40,27 +42,29 @@ var (
 
 func New(out io.Writer) *Logger {
 	return &Logger{
-		out:        out,
-		level:      DEBUG,
-		pid:        os.Getpid(),
-		name:       "",
-		timeLayout: "2006-01-02 15:04:05.000",
-		longFile:   false,
-		colorful:   false,
-		callerSkip: 2,
+		out:            out,
+		level:          INFO,
+		pid:            os.Getpid(),
+		name:           "",
+		timeLayout:     "2006-01-02 15:04:05.000",
+		goroutineId:    false,
+		longFileFormat: false,
+		colorizedLevel: false,
+		callerSkip:     2,
 	}
 }
 
 type Logger struct {
-	mu         sync.Mutex
-	out        io.Writer
-	level      int
-	pid        int
-	name       string
-	timeLayout string
-	longFile   bool
-	colorful   bool
-	callerSkip int
+	mu             sync.Mutex
+	out            io.Writer
+	level          int
+	pid            int
+	name           string
+	timeLayout     string
+	goroutineId    bool
+	longFileFormat bool
+	colorizedLevel bool
+	callerSkip     int
 }
 
 func (l *Logger) GetLevel() int {
@@ -82,13 +86,18 @@ func (l *Logger) SetTimeLayout(layout string) *Logger {
 	return l
 }
 
-func (l *Logger) UseLongFile() *Logger {
-	l.longFile = true
+func (l *Logger) EnableGoroutineId(enable bool) *Logger {
+	l.goroutineId = enable
 	return l
 }
 
-func (l *Logger) SetColorful(colorful bool) *Logger {
-	l.colorful = colorful
+func (l *Logger) EnableLongFileFormat(enable bool) *Logger {
+	l.longFileFormat = enable
+	return l
+}
+
+func (l *Logger) EnableColorizedLevel(enable bool) *Logger {
+	l.colorizedLevel = enable
 	return l
 }
 
@@ -151,7 +160,7 @@ func (l *Logger) log(level int, msg string, args ...interface{}) {
 	if !ok {
 		file = "???"
 		line = 0
-	} else if !l.longFile {
+	} else if !l.longFileFormat {
 		if index := strings.LastIndex(file, "/"); index >= 0 {
 			file = file[index+1:]
 		} else if index = strings.LastIndex(file, "\\"); index >= 0 {
@@ -159,6 +168,8 @@ func (l *Logger) log(level int, msg string, args ...interface{}) {
 		}
 	}
 
+	// output format: DATE PID [NAME] [GID] LEVEL file:line message
+	// 2001-10-10 12:00:00,000+0800 1234 app 987 INFO main.go:1234 log message ...
 	buf := new(bytes.Buffer)
 	buf.WriteByte(' ')
 	buf.WriteString(strconv.Itoa(l.pid))
@@ -167,7 +178,11 @@ func (l *Logger) log(level int, msg string, args ...interface{}) {
 		buf.WriteString(l.name)
 		buf.WriteByte(' ')
 	}
-	if l.colorful {
+	if l.goroutineId || l.level == DEBUG {
+		buf.WriteString(strconv.FormatUint(gls.GoroutineID(), 10))
+		buf.WriteByte(' ')
+	}
+	if l.colorizedLevel {
 		buf.WriteString(levelStrWithColor[level])
 	} else {
 		buf.WriteString(levelStr[level])
