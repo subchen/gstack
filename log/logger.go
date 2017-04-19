@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"os"
 	"runtime"
 	"strconv"
 	"strings"
@@ -41,7 +42,7 @@ func New(out io.Writer) *Logger {
 	return &Logger{
 		out:        out,
 		level:      DEBUG,
-		pid:        os.GetPid(),
+		pid:        os.Getpid(),
 		name:       "",
 		timeLayout: "2006-01-02 15:04:05.000",
 		longFile:   false,
@@ -160,7 +161,7 @@ func (l *Logger) log(level int, msg string, args ...interface{}) {
 
 	buf := new(bytes.Buffer)
 	buf.WriteByte(' ')
-	buf.WriteInt(strconv.Itoa(l.pid))
+	buf.WriteString(strconv.Itoa(l.pid))
 	buf.WriteByte(' ')
 	if l.name != "" {
 		buf.WriteString(l.name)

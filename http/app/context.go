@@ -1,7 +1,9 @@
 package app
 
 import (
+	"encoding/json"
 	"fmt"
+	"mime/multipart"
 	"net/http"
 	"net/url"
 )
@@ -30,6 +32,10 @@ func (ctx *Context) Path() string {
 	return ctx.Request.URL.Path
 }
 
+func (ctx *Context) QueryString() string {
+	return ctx.Request.URL.RawQuery
+}
+
 func (ctx *Context) Method() string {
 	return ctx.Request.Method
 }
@@ -52,6 +58,73 @@ func (ctx *Context) Form(name string) string {
 
 func (ctx *Context) FormValues(name string) []string {
 	return ctx.Request.Form[name]
+}
+
+func (ctx *Context) FormFile(name string) (*multipart.FileHeader, error) {
+	_, f, err := ctx.Request.FormFile(name)
+	return f, err
+}
+
+func (ctx *Context) MultipartForm() (*multipart.Form, error) {
+	err := ctx.Request.ParseMultipartForm(32 << 20) // buffer 32M
+	return ctx.Request.MultipartForm, err
+}
+
+func (ctx *Context) Cookie(name string) (*http.Cookie, error) {
+	return ctx.Request.Cookie(name)
+}
+
+func (ctx *Context) SetCookie(cookie *http.Cookie) {
+	http.SetCookie(ctx.ResponseWriter, cookie)
+}
+
+func (ctx *Context) Cookies() []*http.Cookie {
+	return ctx.Request.Cookies()
+}
+
+func (ctx *Context) JSON(code int, obj interface{}) (err error) {
+	query := ctx.Request.URL.Query()
+
+	// pretty json
+	var b []byte
+	if _, ok := query["pretty"]; ok {
+		b, err = json.MarshalIndent(obj, "", "  ")
+	} else {
+		b, err = json.Marshal(obj)
+	}
+	if err != nil {
+		return
+	}
+
+	// jsonp
+	jsonp := query.Get("callback")
+
+	resp := ctx.ResponseWriter
+	if jsonp == "" {
+		resp.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	} else {
+		resp.Header().Set("Content-Type", "application/javascript; charset=UTF-8")
+	}
+
+	resp.WriteHeader(code)
+
+	if jsonp != "" {
+		if _, err = resp.Write([]byte(jsonp + "(")); err != nil {
+			return
+		}
+	}
+
+	if _, err = resp.Write(b); err != nil {
+		return
+	}
+
+	if jsonp != "" {
+		if _, err = resp.Write([]byte(");")); err != nil {
+			return
+		}
+	}
+
+	return
 }
 
 func (ctx *Context) Redirect(url string) {
