@@ -13,7 +13,7 @@ type (
 	}
 )
 
-// NewCopyOnWriteMap initializes a new map based on an original map.
+// NewCopyOnWriteMap initializes a new empty map.
 // Use of nil to empty the CopyOnWriteMap is okay.
 func NewCopyOnWriteMap() *CopyOnWriteMap {
 	m := new(CopyOnWriteMap)
@@ -78,7 +78,7 @@ func (m *CopyOnWriteMap) Clear() {
 func (m *CopyOnWriteMap) Keys() []Key {
 	data := m.data.Load().(map[Key]Value)
 
-	keys := make([]Key, len(data))
+	var keys []Key
 	for k, _ := range data {
 		keys = append(keys, k)
 	}
@@ -88,7 +88,7 @@ func (m *CopyOnWriteMap) Keys() []Key {
 func (m *CopyOnWriteMap) Values() []Value {
 	data := m.data.Load().(map[Key]Value)
 
-	values := make([]Value, len(data))
+	var values []Value
 	for _, v := range data {
 		values = append(values, v)
 	}
