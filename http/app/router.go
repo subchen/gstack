@@ -7,9 +7,16 @@ import (
 
 type (
 	router struct {
-		root              *node
-		routesList        []*routes                 // all path routes
-		mappingParamIndex map[string]map[string]int // path -> (param -> index)
+		root *node
+
+		// all path routes
+		routesList []*routes
+
+		// a redefined mapping for pathVars: path -> (param -> index)
+		// Example:
+		//   /users/{userid}/books/{bookid}" -> { userid: 1, bookid: 3}
+		//   /files/{file*}"                 -> { file: 1}
+		mappingParamIndex map[string]map[string]int
 	}
 
 	node struct {
@@ -18,13 +25,13 @@ type (
 		routes   *routes
 	}
 
-	// routes is group of route, they have same path
+	// routes is group of route, they have same path pattern
 	routes struct {
-		path   string
+		path   string // origin path pattern
 		routes []*route
 	}
 
-	// route is a defined handler
+	// route is a defined handler for path+method
 	route struct {
 		path    string // origin path pattern
 		method  string
@@ -33,7 +40,9 @@ type (
 )
 
 var (
+	// validate path pattern, support {name}, {name*} as param match
 	RE_PATH_PATTERN_1 = regexp.MustCompile(`^(/([a-zA-Z0-9_\-.]+|\{[A-zA-Z0-9_\-]+\*?\}))*/?$`)
+	// validate {name*} must be last
 	RE_PATH_PATTERN_2 = regexp.MustCompile(`^[^*]+(\*\})?$`)
 )
 
@@ -49,6 +58,7 @@ func newRouter() *router {
 
 // add registers a handler into router tree
 func (r *router) add(method string, path string, handler HandlerFunc) {
+	// 0. validate path pattern
 	if !RE_PATH_PATTERN_1.MatchString(path) {
 		panic("Invalid path pattern: " + path)
 	}
@@ -115,6 +125,7 @@ func (r *router) add(method string, path string, handler HandlerFunc) {
 	}
 }
 
+// find routes for specified path, pathnames is a split for path
 func (r *router) find(pathnames []string) *routes {
 	if n := r.root.find(pathnames[1], pathnames[2:]); n != nil {
 		return n.routes
@@ -123,8 +134,8 @@ func (r *router) find(pathnames []string) *routes {
 }
 
 // makeVars returns vars
-func (r *router) makeVars(path string, pathnames []string) map[string]string {
-	if mapping, ok := r.mappingParamIndex[path]; ok {
+func (r *router) makeVars(pathpattern string, pathnames []string) map[string]string {
+	if mapping, ok := r.mappingParamIndex[pathpattern]; ok {
 		vars := make(map[string]string, len(mapping))
 		for name, index := range mapping {
 			if name[len(name)-1] == '*' {
