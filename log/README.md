@@ -11,7 +11,8 @@ Logging package similar to log4j for the Golang.
 * Fixed size log file ouput
 * Output console and file all at once
 * Output full stack
-* Output colorful message to console
+* Output goroutinue id to console
+* Output colorized level to console
 
 Installation
 ---------------
@@ -52,8 +53,8 @@ import (
 func main() {
     log.SetWriter(&log.FixedSizeFileWriter{
         Name:     "/tmp/test.log",
-		MaxSize:  10 * 1024 * 1024, // 10m
-		MaxCount: 10,
+        MaxSize:  10 * 1024 * 1024, // 10m
+        MaxCount: 10,
     })
 
     log.Debug("x = %v", "123")
@@ -123,14 +124,15 @@ You can use `log.Fatal(...)` to output full stack
 ### Log format
 
 ```
-# time [name] level file:line message
-2016-02-10 19:33:02.587 main INFO fixed_size_file_writer_test.go:16 i = 99
+# time pid [name] [gid] level file:line message
+2016-02-10 19:33:02.587 12345 main 987 INFO fixed_size_file_writer_test.go:16 message ...
 ```
 
 * `log.SetTimeLayout("2006-01-02 15:04:05.999")` customize time format
 * `log.SetName("main")` add a name in log for indicate process
-* `log.UseLongFile()` to output long file name
-* `log.SetColorful(true)` to output colorful message to console
+* `log.EnableGoroutineId(true)` to output goroutine id
+* `log.EnableLongFileFormat(true)` to output long file name
+* `log.EnableColorizedLevel(true)` to output colorful message to console
 
 ### API on godoc.org
 
