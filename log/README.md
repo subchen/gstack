@@ -86,7 +86,7 @@ func main() {
 
 // Output to multiple writes
 &log.CompositeWriters{
-	os.Stdout,
+    os.Stdout,
     &log.DailyFileWriter{
         Name: "/tmp/test.log",
     }
