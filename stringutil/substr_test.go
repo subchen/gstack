@@ -87,10 +87,10 @@ func TestSubstrAfterLast(t *testing.T) {
 	}
 }
 
-func TestSubstrBetweenLast(t *testing.T) {
+func TestSubstrBetween(t *testing.T) {
 	var tests = []struct {
 		str   string
-		start string
+		begin string
 		end   string
 		want  string
 	}{
@@ -105,8 +105,8 @@ func TestSubstrBetweenLast(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		if got := SubstrBetween(test.str, test.start, test.end); got != test.want {
-			t.Errorf("SubstrAfterLast(%q, %q, %q) = %q; want: %q", test.str, test.start, test.end, got, test.want)
+		if got := SubstrBetween(test.str, test.begin, test.end); got != test.want {
+			t.Errorf("SubstrAfterLast(%q, %q, %q) = %q; want: %q", test.str, test.begin, test.end, got, test.want)
 		}
 	}
 }
