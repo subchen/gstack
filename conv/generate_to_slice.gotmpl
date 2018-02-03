@@ -15,16 +15,16 @@
 */}}
 package conv
 
-func As{{.name|title}}Slice(values []interface) []{{.name}} {
+func As{{.name|title}}Slice(values []interface{}) []{{.name}} {
 	v, _ := to{{.name|title}}Slice(values)
 	return v
 }
 
-func To{{.name|title}}Slice(values []interface) ([]{{.name}}, error) {
+func To{{.name|title}}Slice(values []interface{}) ([]{{.name}}, error) {
 	return to{{.name|title}}Slice(values)
 }
 
-func to{{.name|title}}Slice(values []interface) ([]{{.name}}, error) {
+func to{{.name|title}}Slice(values []interface{}) ([]{{.name}}, error) {
 	if values == nil {
 		return nil, nil
 	}
