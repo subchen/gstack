@@ -1,0 +1,74 @@
+{{/*
+    frep generate_to_number.gotmpl:to_int.go     -e name="int"   -e size=""
+    frep generate_to_number.gotmpl:to_int8.go    -e name="int"   -e size="8"
+    frep generate_to_number.gotmpl:to_int16.go   -e name="int"   -e size="16"
+    frep generate_to_number.gotmpl:to_int32.go   -e name="int"   -e size="32"
+    frep generate_to_number.gotmpl:to_int64.go   -e name="int"   -e size="64"
+    frep generate_to_number.gotmpl:to_uint.go    -e name="uint"  -e size=""
+    frep generate_to_number.gotmpl:to_uint8.go   -e name="uint"  -e size="8"
+    frep generate_to_number.gotmpl:to_uint16.go  -e name="uint"  -e size="16"
+    frep generate_to_number.gotmpl:to_uint32.go  -e name="uint"  -e size="32"
+    frep generate_to_number.gotmpl:to_uint64.go  -e name="uint"  -e size="64"
+    frep generate_to_number.gotmpl:to_float32.go -e name="float" -e size="32"
+    frep generate_to_number.gotmpl:to_float64.go -e name="float" -e size="64"
+*/}}
+package conv
+
+import (
+	"fmt"
+	"strconv"
+)
+
+{{ $typename := printf "%s%s" .name .size }}
+func As{{$typename|title}}(value interface{}) {{$typename}} {
+	v, _ := to{{$typename|title}}(value)
+	return v
+}
+
+func To{{$typename|title}}(value interface{}) ({{$typename}}, error) {
+	return to{{$typename|title}}(value)
+}
+
+func to{{$typename|title}}(value interface{}) ({{$typename}}, error) {
+	switch v := value.(type) {
+	case bool:
+		if v {
+			return {{$typename}}(1), nil
+		}
+		return {{$typename}}(0), nil
+	case int:
+		return {{$typename}}(v), nil
+	case int8:
+		return {{$typename}}(v), nil
+	case int16:
+		return {{$typename}}(v), nil
+	case int32:
+		return {{$typename}}(v), nil
+	case int64:
+		return {{$typename}}(v), nil
+	case uint:
+		return {{$typename}}(v), nil
+	case uint8:
+		return {{$typename}}(v), nil
+	case uint16:
+		return {{$typename}}(v), nil
+	case uint32:
+		return {{$typename}}(v), nil
+	case uint64:
+		return {{$typename}}(v), nil
+	case float32:
+		return {{$typename}}(v), nil
+	case float64:
+		return {{$typename}}(v), nil
+	case string:
+		n, err := strconv.Parse{{.name|title}}(v,{{if ne .name "float"}} 0,{{end}} {{.size|default "0"}})
+		if err != nil {
+			return {{$typename}}(0), fmt.Errorf("unable convert string(%s) to {{$typename}} ", v)
+		}
+		return {{$typename}}(n), nil
+	case nil:
+		return {{$typename}}(0), nil
+	default:
+		return {{$typename}}(0), fmt.Errorf("unable convert %T to {{$typename}} ", value)
+	}
+}
