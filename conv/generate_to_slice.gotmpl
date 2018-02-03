@@ -1,0 +1,41 @@
+{{/*
+    frep generate_to_slice.gotmpl:to_string_slice.go  -e name="string"
+    frep generate_to_slice.gotmpl:to_int_slice.go     -e name="int"
+    frep generate_to_slice.gotmpl:to_int8_slice.go    -e name="int8"
+    frep generate_to_slice.gotmpl:to_int16_slice.go   -e name="int16"
+    frep generate_to_slice.gotmpl:to_int32_slice.go   -e name="int32"
+    frep generate_to_slice.gotmpl:to_int64_slice.go   -e name="int64"
+    frep generate_to_slice.gotmpl:to_uint_slice.go    -e name="uint"
+    frep generate_to_slice.gotmpl:to_uint8_slice.go   -e name="uint8"
+    frep generate_to_slice.gotmpl:to_uint16_slice.go  -e name="uint16"
+    frep generate_to_slice.gotmpl:to_uint32_slice.go  -e name="uint32"
+    frep generate_to_slice.gotmpl:to_uint64_slice.go  -e name="uint64"
+    frep generate_to_slice.gotmpl:to_float32_slice.go -e name="float32"
+    frep generate_to_slice.gotmpl:to_float64_slice.go -e name="float64"
+*/}}
+package conv
+
+func As{{.name|title}}Slice(values []interface) []{{.name}} {
+	v, _ := to{{.name|title}}Slice(values)
+	return v
+}
+
+func To{{.name|title}}Slice(values []interface) ([]{{.name}}, error) {
+	return to{{.name|title}}Slice(values)
+}
+
+func to{{.name|title}}Slice(values []interface) ([]{{.name}}, error) {
+	if values == nil {
+		return nil, nil
+	}
+
+	results := make([]{{.name}}, len(values)
+	var err error
+	for i, v := range values {
+		results[i], err = to{{.name|title}}(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return results, nil
+}
